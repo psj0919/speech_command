@@ -246,8 +246,6 @@ if __name__ == '__main__':
     # ----------------------------------------------------
 
     # ----------------predict----------------------------------------
-    waveform, sample_rate, utterance, *_ = train_set[-1]
-    print(f"Expected: {utterance}. Predicted: {predict(waveform)}.")
 
     for i, (waveform, sample_rate, utterance, *_) in enumerate(test_set):
         output = predict(waveform)
@@ -261,3 +259,8 @@ if __name__ == '__main__':
             print(f"Data point #{i}. Expected: {utterance}. Predicted: {output}.")
 
     # ----------------------------------------------------------------
+
+    #--------------------homework_predict-------------------------
+    waveform, sample_rate, utterance, *_ = train_set[-1]
+    print(f"Expected: {utterance}. Predicted: {predict(waveform)}.")
+    #-----------------------------------------------------------------

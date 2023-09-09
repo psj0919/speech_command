@@ -1,3 +1,6 @@
+
+
+
 def record(seconds=1):
     from base64 import b64decode
     from io import BytesIO
@@ -38,3 +41,7 @@ def record(seconds=1):
     filename = f"_audio.{fileformat}"
     AudioSegment.from_file(BytesIO(b)).export(filename, format=fileformat)
     return torchaudio.load(filename)
+
+if __name__=='__main__':
+    waveform, sample_rate = record()
+    print(f"Predicted: {predict(waveform)}.")
