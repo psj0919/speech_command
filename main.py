@@ -12,10 +12,10 @@ from tqdm import tqdm
 from torchaudio.datasets import SPEECHCOMMANDS
 import os
 
-from model import M5
+from model import M5  #model.py에 있는 M5 network를 import 해옴
 
 
-class SubsetSC(SPEECHCOMMANDS):
+class SubsetSC(SPEECHCOMMANDS): # speechcommand dataset이 없으면 다운로드 받고 학습 시키는게 train인지 test인지 판별함
     def __init__(self, subset: str = None):
         super().__init__("./", download=True)
 
@@ -242,8 +242,7 @@ if __name__ == '__main__':
             train(model, epoch, log_interval)
             eval(model, epoch)
             scheduler.step()
-            if eval_acc > prev_acc:
-                save(model)
+            save(model)
     # ----------------------------------------------------
 
     # ----------------predict----------------------------------------
