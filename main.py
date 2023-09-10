@@ -46,7 +46,7 @@ def train(model, epoch, log_interval):
         # target = target.to(device)
 
         # apply transform and model on whole batch directly on device
-        data = transform(data)
+        data = transform(data) # sample_rate를 8KHz로 변경
         output = model(data)
 
         # negative log-likelihood for a tensor of size (batch x 1 x n_output)
@@ -72,13 +72,13 @@ def train(model, epoch, log_interval):
 def eval(model, epoch):
     pbar_update = 1 / (len(train_loader) + len(test_loader))
     model.eval()
-    correct = 0
+    correct = 0 # 맞춘 갯수 확인
     for data, target in test_loader:
         # data = data.to(device)
         # target = target.to(device)
 
         # apply transform and model on whole batch directly on device
-        data = transform(data)
+        data = transform(data) # sample_rate를 8KHz로 변경
         output = model(data)
 
         pred = get_likely_index(output)
@@ -110,7 +110,7 @@ def count_parameters(model):
 
 def label_to_index(word):
     # Return the position of the word in labels
-    return torch.tensor(labels.index(word))
+    return torch.tensor(labels.index(word)) # tensor형태로 labels.index(word)로 반환
 
 
 def index_to_label(index):
@@ -121,6 +121,7 @@ def index_to_label(index):
 
 def pad_sequence(batch):
     # Make all tensor in a batch the same length by padding with zeros
+    # padding을 하기 위함
     batch = [item.t() for item in batch]
     batch = torch.nn.utils.rnn.pad_sequence(batch, batch_first=True, padding_value=0.)
     return batch.permute(0, 2, 1)
@@ -134,12 +135,12 @@ def collate_fn(batch):
 
     # Gather in lists, and encode labels as indices
     for waveform, _, label, *_ in batch:
-        tensors += [waveform]
+        tensors += [waveform] # 각 waveform에 대한 정보를 tensors라는 list에 저장
         targets += [label_to_index(label)]
 
     # Group the list of tensors into a batched tensor
-    tensors = pad_sequence(tensors)
-    targets = torch.stack(targets)
+    tensors = pad_sequence(tensors) # waveform에 대한 정보가 담김
+    targets = torch.stack(targets) # label정보가 담김
 
     return tensors, targets
 
@@ -151,7 +152,7 @@ def number_of_correct(pred, target):
 
 def get_likely_index(tensor):
     # find most likely label index for each element in the batch
-    return tensor.argmax(dim=-1)
+    return tensor.argmax(dim=-1) # 각 배치의 요소들 중 가장 labels와 비슷한 것을 찾기위함
 
 
 if __name__ == '__main__':
