@@ -15,7 +15,7 @@ import os
 from model import M5  #model.py에 있는 M5 network를 import 해옴
 
 
-class SubsetSC(SPEECHCOMMANDS): # speechcommand dataset이 없으면 다운로드 받고 학습 시키는게 train인지 test인지 판별함
+class SubsetSC(SPEECHCOMMANDS): # speechcommand dataset이 없으면 다운로드 받음
     def __init__(self, subset: str = None):
         super().__init__("./", download=True)
 
@@ -24,6 +24,7 @@ class SubsetSC(SPEECHCOMMANDS): # speechcommand dataset이 없으면 다운로�
             with open(filepath) as fileobj:
                 return [os.path.normpath(os.path.join(self._path, line.strip())) for line in fileobj]
 
+        # 학습 시키는게 train인지 test인지 판별함
         if subset == "validation":
             self._walker = load_list("validation_list.txt")
         elif subset == "testing":
@@ -97,8 +98,8 @@ def save(model):
 def predict(tensor):
     # Use the model to predict the label of the waveform
     # tensor = tensor.to(device)
-    tensor = transform(tensor)
-    tensor = model(tensor.unsqueeze(0))
+    tensor = transform(tensor) # 매개변수로 받은 tensor를 8KHz로 변환
+    tensor = model(tensor.unsqueeze(0)) # model에 학습시킴
     tensor = get_likely_index(tensor)
     tensor = index_to_label(tensor.squeeze())
     return tensor
@@ -116,7 +117,8 @@ def label_to_index(word):
 def index_to_label(index):
     # Return the word corresponding to the index in labels
     # This is the inverse of label_to_index
-    return labels[index]
+    
+    return labels[index] # 예측한 결과를 str로 변환해줌
 
 
 def pad_sequence(batch):
