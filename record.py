@@ -1,6 +1,4 @@
-
-
-
+# 목소리를 녹음하기 위한 코드
 def record(seconds=1):
     from base64 import b64decode
     from io import BytesIO

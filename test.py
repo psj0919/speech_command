@@ -32,7 +32,7 @@ class SubsetSC(SPEECHCOMMANDS):
             excludes = set(excludes)
             self._walker = [w for w in self._walker if w not in excludes]
 
-def load_weights(option, model, optimizer, scheduler, device):
+def load_weights(option, model, optimizer, scheduler, device): # 저장된 가중치를 불러와 predict할 때 사용함
     if option.checkpoints_file is not None:
         print("Loading saved weights {}".format(option.checkpoints_file))
         file_path = os.path.join(option.checkpoints_save_path, option.checkpoints_file)
