@@ -35,10 +35,10 @@ class SubsetSC(SPEECHCOMMANDS): # speechcommand dataset이 없으면 다운로�
 
 
 def train(model, epoch, log_interval):
-    losses = []
+    losses = [] # loss를 확인하기 위해 사용한 변수
     pbar_update = 1 / (len(train_loader) + len(test_loader))
 
-    model.train()
+    model.train() # 학습을 train으로 함
 
     for batch_idx, (data, target) in enumerate(train_loader):
 
@@ -64,8 +64,10 @@ def train(model, epoch, log_interval):
         # update progress bar
         pbar.update(pbar_update)
         # record loss
-        losses.append(loss.item())
+        losses.append(loss.item()) # loss를 확인하기 위해 list에 각 loss를 담음
 
+    plt.plot(losses)   # loss를 확인해보기 위한 코드
+    plt.title("training loss") # 제목을 training_loss로 함
 
 def eval(model, epoch):
     pbar_update = 1 / (len(train_loader) + len(test_loader))
@@ -186,12 +188,12 @@ if __name__ == '__main__':
 
     # --------------------- sample_rate를 16KHz에서 8KHz로 변경 ----------------------------------
     new_sample_rate = 8000  # 8KHz로 사용
-    transform = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=new_sample_rate)
-    transformed = transform(waveform)
-    plt.plot(transformed.t().numpy())
+    transform = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=new_sample_rate) #기존 sample_rate 16KHz에서 8KHz로 변경하기 위한 코드
+    transformed = transform(waveform) #waveform의 sample_rate를 8KHz로 변경
+    plt.plot(transformed.t().numpy()) #주파수로 확인
     # -----------------------------------------------------------------------------------------
 
-    # -------------------
+    # ------------------- device_check--------------------
     batch_size = 256
     if device == "cuda":
         num_workers = 1
@@ -209,7 +211,7 @@ if __name__ == '__main__':
         collate_fn=collate_fn,
         num_workers=num_workers,
         pin_memory=pin_memory,
-    )
+    )  # train_set에 대한 데이터를 무작위로 load 해옴
 
     test_loader = torch.utils.data.DataLoader(
         test_set,
@@ -219,18 +221,18 @@ if __name__ == '__main__':
         collate_fn=collate_fn,
         num_workers=num_workers,
         pin_memory=pin_memory,
-    )
+    ) # test_set에 대한 데이터를 무작위로 load 해옴
     # -----------------------------------------------------
 
     # ---------------------- model ----------------------------
-    model = M5(n_input=transformed.shape[0], n_output=len(labels))
+    model = M5(n_input=transformed.shape[0], n_output=len(labels))  # model을 M5로 하여서 input으로 8KHz로 변환한 데이터의 waveform으로 하고 output으로 labels의 길이
     # model.to(device)
     print(model)
     # -------------------------------------------------------------
 
     # ----------------optimizer, scheduler setup--------------------------------
-    optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=5e-5)
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)
+    optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=5e-5)   # optimizer를 설정함
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1) # scheduler를 설정함
     # ---------------------------------------------------------------------------
 
     # -----------------training-------------------------
@@ -242,13 +244,13 @@ if __name__ == '__main__':
             train(model, epoch, log_interval)
             eval(model, epoch)
             scheduler.step()
-            save(model)
+            save(model)  #학습한 weights를 저장함
     # ----------------------------------------------------
 
     # ----------------predict----------------------------------------
 
     for i, (waveform, sample_rate, utterance, *_) in enumerate(test_set):
-        output = predict(waveform)
+        output = predict(waveform) # 학습한 데이터로 하여 test의 데이터를 불러와 predict함
         if output != utterance:
             print(f"Data point #{i}. Expected: {utterance}. Predicted: {output}.")
             break

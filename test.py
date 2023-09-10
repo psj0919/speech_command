@@ -13,7 +13,7 @@ from torchaudio.datasets import SPEECHCOMMANDS
 import os
 
 from model import M5  #model.py에 있는 M5 network를 import 해옴
-
+# 과제를 수행하기 위해 생성한 test코드
 class SubsetSC(SPEECHCOMMANDS):
     def __init__(self, subset: str = None):
         super().__init__("./", download=True)
