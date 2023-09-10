@@ -117,7 +117,7 @@ def label_to_index(word):
 def index_to_label(index):
     # Return the word corresponding to the index in labels
     # This is the inverse of label_to_index
-    
+
     return labels[index] # 예측한 결과를 str로 변환해줌
 
 
