@@ -11,6 +11,7 @@ import IPython.display as ipd
 from tqdm import tqdm
 from torchaudio.datasets import SPEECHCOMMANDS
 import os
+from scipy.io import wavfile
 
 from model import M5  #model.py에 있는 M5 network를 import 해옴
 
@@ -269,3 +270,13 @@ if __name__ == '__main__':
     waveform, sample_rate, utterance, *_ = train_set[-1]
     print(f"Expected: {utterance}. Predicted: {predict(waveform)}.")
     #-----------------------------------------------------------------
+
+    # --------------------------음성파일 읽기------------------------
+    import scipy.io as sio
+    import librosa
+
+    sample, data = sio.wavfile.read('./speech_test/_audio (1).wav')
+    data = torch.tensor(data, dtype=torch.float32)
+    trans =  librosa.resample(data,sample, 16000)
+    
+    # ---------------------------------------------------------------
