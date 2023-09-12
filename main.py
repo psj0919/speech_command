@@ -146,7 +146,14 @@ def collate_fn(batch):
     targets = torch.stack(targets) # label정보가 담김
 
     return tensors, targets
+def collate_fn_for_pred(batch):
+    tensors = []
+    for waveform in batch:
+        tensors += [waveform]
 
+    tensors = pad_sequence(tensors)
+
+    return tensors
 
 def number_of_correct(pred, target):
     # count number of correct predictions
@@ -278,5 +285,15 @@ if __name__ == '__main__':
     sample, data = sio.wavfile.read('./speech_test/_audio (1).wav')
     data = torch.tensor(data, dtype=torch.float32)
     trans =  librosa.resample(data,sample, 16000)
-    
+
+    pred_set = SubsetSC()
+    pre_loader = torch.utils.data.DataLoader(
+        './speech_test/_audio (1).wav',
+        batch_size=batch_size,
+        shuffle=False,
+        drop_last=False,
+        collate_fn=collate_fn,
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+    )
     # ---------------------------------------------------------------
