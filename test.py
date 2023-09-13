@@ -11,6 +11,7 @@ from model import M5
 from tqdm import tqdm
 from torchaudio.datasets import SPEECHCOMMANDS
 import os
+import torchaudio.transforms as T
 
 from model import M5  #model.py에 있는 M5 network를 import 해옴
 
@@ -146,20 +147,13 @@ if __name__ == '__main__':
 
 
     # ---------------------------------for predict---------------------------------------
-    batch_size = 1
+    wav = './speech_test/_audio (2).wav'
+    (file_dir, file_id) = os.path.split(wav)
 
-    pre_loader = torch.utils.data.DataLoader(
-        './speech_test/_audio (1).wav',
-        batch_size=batch_size,
-        shuffle=False,
-        drop_last=False,
-        collate_fn=collate_fn_for_pred,
-        num_workers=0,
-        pin_memory=False,
-    )
-    for id, data in enumerate(pre_loader):
-        print(data)
-
+    wavform, sample_rate = torchaudio.load(wav)
+    transform_pred = T.Resample(orig_freq=43200, new_freq=16000)
+    wavform = transform_pred(wavform)
+    print(predict(wavform))
     # ------------------------------------------------------------------------------------
 
 
