@@ -12,6 +12,7 @@ from tqdm import tqdm
 from torchaudio.datasets import SPEECHCOMMANDS
 import os
 from scipy.io import wavfile
+import torchaudio.transforms as T
 
 from model import M5  #model.py에 있는 M5 network를 import 해옴
 
@@ -169,7 +170,8 @@ if __name__ == '__main__':
     global new_sample_rate
 
     # --------------------GPU 또는 CPU 사용-------------------------
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    gpu_id = '0'
+    device = torch.device("cuda:{}".format(gpu_id) if torch.cuda.is_available() else "cpu")
     print(device)
     # ------------------------------------------------------------
 
@@ -182,26 +184,26 @@ if __name__ == '__main__':
     waveform, sample_rate, label, speaker_id, utterance_number = train_set[0]
     print("Shape of waveform: {}".format(waveform.size()))
     print("Sample rate of waveform: {}".format(sample_rate))
-    plt.plot(waveform.t().numpy())
+    # plt.plot(waveform.t().numpy())
     labels = sorted(list(set(datapoint[2] for datapoint in train_set)))
     # ----------------------------------------------------------------------------
 
     # ------------------- 음성데이터 들어보기 위한 예제 코드 -----------------------
-    waveform_first, *_ = train_set[0]
-    ipd.Audio(waveform_first.numpy(), rate=sample_rate)
-
-    waveform_second, *_ = train_set[1]
-    ipd.Audio(waveform_second.numpy(), rate=sample_rate)
-
-    waveform_last, *_ = train_set[-1]
-    ipd.Audio(waveform_last.numpy(), rate=sample_rate)
+    # waveform_first, *_ = train_set[0]
+    # ipd.Audio(waveform_first.numpy(), rate=sample_rate)
+    #
+    # waveform_second, *_ = train_set[1]
+    # ipd.Audio(waveform_second.numpy(), rate=sample_rate)
+    #
+    # waveform_last, *_ = train_set[-1]
+    # ipd.Audio(waveform_last.numpy(), rate=sample_rate)
     # ---------------------------------------------------------------------
 
     # --------------------- sample_rate를 16KHz에서 8KHz로 변경 ----------------------------------
     new_sample_rate = 8000  # 8KHz로 사용
     transform = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=new_sample_rate) #기존 sample_rate 16KHz에서 8KHz로 변경하기 위한 코드
     transformed = transform(waveform) #waveform의 sample_rate를 8KHz로 변경
-    plt.plot(transformed.t().numpy()) #주파수로 확인
+    # plt.plot(transformed.t().numpy()) #주파수로 확인
     # -----------------------------------------------------------------------------------------
 
     # ------------------- device_check--------------------
@@ -232,7 +234,7 @@ if __name__ == '__main__':
         collate_fn=collate_fn,
         num_workers=num_workers,
         pin_memory=pin_memory,
-    ) # test_set에 대한 데이터를 무작위로 load 해옴
+    ) # test_set에 대한 데이터를 load 해옴
     # -----------------------------------------------------
 
     # ---------------------- model ----------------------------
@@ -258,42 +260,38 @@ if __name__ == '__main__':
             save(model)  #학습한 weights를 저장함
     # ----------------------------------------------------
 
-    # ----------------predict----------------------------------------
+    # -----------------------------------predict----------------------------------------
 
-    for i, (waveform, sample_rate, utterance, *_) in enumerate(test_set):
-        output = predict(waveform) # 학습한 데이터로 하여 test의 데이터를 불러와 predict함
-        if output != utterance:
-            print(f"Data point #{i}. Expected: {utterance}. Predicted: {output}.")
-            break
-
-        else:
-            print("All examples in this dataset were correctly classified!")
-            print("In this case, let's just look at the last data point")
-            print(f"Data point #{i}. Expected: {utterance}. Predicted: {output}.")
+    # for i, (waveform, sample_rate, utterance, *_) in enumerate(test_set):
+    #     output = predict(waveform) # 학습한 데이터로 하여 test의 데이터를 불러와 predict함
+    #     if output != utterance:
+    #         print(f"Data point #{i}. Expected: {utterance}. Predicted: {output}.")
+    #         break
+    #
+    #     else:
+    #         print("All examples in this dataset were correctly classified!")
+    #         print("In this case, let's just look at the last data point")
+    #         print(f"Data point #{i}. Expected: {utterance}. Predicted: {output}.")
 
     # ----------------------------------------------------------------
 
     #--------------------homework_predict-------------------------
-    waveform, sample_rate, utterance, *_ = train_set[-1]
-    print(f"Expected: {utterance}. Predicted: {predict(waveform)}.")
+    # waveform, sample_rate, utterance, *_ = train_set[-1]
+    # print(f"Expected: {utterance}. Predicted: {predict(waveform)}.")
     #-----------------------------------------------------------------
 
-    # --------------------------음성파일 읽기------------------------
-    import scipy.io as sio
-    import librosa
 
-    sample, data = sio.wavfile.read('./speech_test/_audio (1).wav')
-    data = torch.tensor(data, dtype=torch.float32)
-    trans =  librosa.resample(data,sample, 16000)
 
-    pred_set = SubsetSC()
-    pre_loader = torch.utils.data.DataLoader(
-        './speech_test/_audio (1).wav',
-        batch_size=batch_size,
-        shuffle=False,
-        drop_last=False,
-        collate_fn=collate_fn,
-        num_workers=num_workers,
-        pin_memory=pin_memory,
-    )
-    # ---------------------------------------------------------------
+    # ---------------------------------for predict---------------------------------------
+    # './speech_test/_audio (1).wav' -> label: bird
+    # './speech_test/_audio (2).wav' -> label: backward
+    wav = './speech_test/_audio (2).wav'
+    (file_dir, file_id) = os.path.split(wav)
+
+    wavform, sample_rate = torchaudio.load(wav)
+    transform_pred = T.Resample(orig_freq=43200, new_freq=16000)
+    wavform = transform_pred(wavform)
+    print("*---------------------------------------------------------------------------------*")
+    print("for my voice predict: ", format(predict(wavform)))
+    # ------------------------------------------------------------------------------------
+

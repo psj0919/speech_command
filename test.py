@@ -154,6 +154,7 @@ if __name__ == '__main__':
     transform_pred = T.Resample(orig_freq=43200, new_freq=16000)
     wavform = transform_pred(wavform)
     print(predict(wavform))
+
     # ------------------------------------------------------------------------------------
 
 
